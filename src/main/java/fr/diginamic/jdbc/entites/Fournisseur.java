@@ -1,13 +1,16 @@
 package fr.diginamic.jdbc.entites;
 
 public class Fournisseur {
-	int id;
-	String nom;
+	private int id;
+	private String nom;
 	
 	public Fournisseur(int id, String nom) {
 		super();
 		this.id = id;
 		this.nom = nom;
+	}
+	public Fournisseur() {
+
 	}
 
 	@Override
