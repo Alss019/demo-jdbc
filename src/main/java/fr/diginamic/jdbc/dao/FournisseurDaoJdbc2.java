@@ -2,10 +2,9 @@ package fr.diginamic.jdbc.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,13 +12,13 @@ import org.mariadb.jdbc.Driver;
 
 import fr.diginamic.jdbc.entites.Fournisseur;
 
-public class FournisseurDaoJdbc implements FournisseurDao{
+public class FournisseurDaoJdbc2 implements FournisseurDao{
 	
     private String url; 
     private String user; 
     private String password; 
 
-    public FournisseurDaoJdbc(String url, String user, String password) {
+    public FournisseurDaoJdbc2(String url, String user, String password) {
         this.url = url;
         this.user = user;
         this.password = password;
@@ -28,7 +27,7 @@ public class FournisseurDaoJdbc implements FournisseurDao{
 	@Override
 	public List<Fournisseur> extraire() {
         Connection co = null;
-        Statement stat = null;
+        PreparedStatement stat = null;
         ResultSet res = null;
         
 		ArrayList<Fournisseur> liste = new ArrayList<>();
@@ -41,9 +40,9 @@ public class FournisseurDaoJdbc implements FournisseurDao{
 		}
 		try {
 			co= DriverManager.getConnection(url, user, password );
-			stat = co.createStatement();
-			res = stat.executeQuery("SELECT * FROM FOURNISSEUR");
-			
+			String sql ="SELECT * FROM FOURNISSEUR";
+			stat = co.prepareStatement(sql);
+	        res = stat.executeQuery();
 			while(res.next()) {
 				int id = res.getInt("ID");
 				String nom = res.getString("NOM");
@@ -75,20 +74,21 @@ public class FournisseurDaoJdbc implements FournisseurDao{
 	@Override
 	public void insert(Fournisseur fournisseur) {
         Connection co = null;
-        Statement stat = null;
+        PreparedStatement preparedStatement = null;
 		try {			
 			DriverManager.registerDriver(new Driver());
 			co= DriverManager.getConnection(url, user, password );
-			stat = co.createStatement();
-			String nomSql = fournisseur.getNom().replaceAll("'", "''");
-			String sql =  "INSERT INTO fournisseur (nom) VALUES ('"+ nomSql +"')";
-            stat.executeUpdate(sql);
+			
+			String sql =  "INSERT INTO fournisseur (nom) VALUES (?)";
+            preparedStatement = co.prepareStatement(sql);
+            preparedStatement.setString(1, fournisseur.getNom());
+            preparedStatement.executeUpdate();
 			
 		}catch(SQLException e) {
 			System.err.println("Erreur: " + e.getMessage());
 		}finally {
 				try {
-					if(stat != null) {stat.close();}
+					if(preparedStatement != null) {preparedStatement.close();}
 					if(co != null) {co.close();}
 				} catch (SQLException e) {
 					e.printStackTrace();
@@ -100,23 +100,25 @@ public class FournisseurDaoJdbc implements FournisseurDao{
 	@Override
 	public int update(String ancienNom, String nouveauNom) {
         Connection co = null;
-        Statement stat = null;
+        PreparedStatement preparedStatement = null;
 		int rowsAffected = 0;
 		try {			
 			DriverManager.registerDriver(new Driver());
 			co= DriverManager.getConnection(url, user, password );
-			stat = co.createStatement();
+			
+			String sql =   "UPDATE fournisseur SET nom = (?) WHERE nom = (?)";
+            preparedStatement = co.prepareStatement(sql);
+            preparedStatement.setString(1, nouveauNom);
+            preparedStatement.setString(2, ancienNom);
+            preparedStatement.executeUpdate();
 
-			String sql = "UPDATE fournisseur SET nom = '"+nouveauNom+"' WHERE nom = '"+ancienNom+"'";
-
-
-			rowsAffected = stat.executeUpdate(sql);
+			rowsAffected = preparedStatement.executeUpdate();
 			
 		}catch(SQLException e) {
 			System.err.println("Erreur: " + e.getMessage());
 		}finally {
 			try {
-				if(stat != null) {stat.close();}
+				if(preparedStatement != null) {preparedStatement.close();}
 				if(co != null) {co.close();}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -128,20 +130,23 @@ public class FournisseurDaoJdbc implements FournisseurDao{
 	@Override
 	public boolean delete(Fournisseur fournisseur) {
         Connection co = null;
-        Statement stat = null;
+        PreparedStatement preparedStatement = null;
         boolean delete = false;
 		try {			
 			DriverManager.registerDriver(new Driver());
 			co= DriverManager.getConnection(url, user, password );
-			stat = co.createStatement();
-			String sql = "DELETE FROM fournisseur WHERE nom = '"+fournisseur+"'";
-			delete = stat.executeUpdate(sql) > 0;
+			
+			String sql = "DELETE FROM fournisseur WHERE nom = ?";
+			preparedStatement = co.prepareStatement(sql);
+			preparedStatement.setString(1, fournisseur.getNom());
+			preparedStatement.executeUpdate();
+			delete = preparedStatement.executeUpdate() > 0;
 		}catch(SQLException e) {
 			System.err.println("Erreur: " + e.getMessage());
 			return false;
 		}finally {
 			try {
-				if(stat != null) {stat.close();}
+				if(preparedStatement != null) {preparedStatement.close();}
 				if(co != null) {co.close();}
 			} catch (SQLException e) {
 				e.printStackTrace();

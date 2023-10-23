@@ -14,7 +14,7 @@ public class TestDaoJdbc {
 
 		nouveauFournisseur.setNom("France de matériaux");
 		fournisseurDao.insert(nouveauFournisseur);
-		nouveauFournisseur.setNom("L\'Espace Création");
+		nouveauFournisseur.setNom("L'Espace Création");
 		fournisseurDao.insert(nouveauFournisseur);
 
 		System.out.println("\n---- Liste de fournisseur mise à jour (INSERT)----");
