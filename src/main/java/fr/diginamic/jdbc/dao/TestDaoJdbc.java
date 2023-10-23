@@ -8,8 +8,7 @@ public class TestDaoJdbc {
 
 	public static void main(String[] args) {
 
-		FournisseurDao fournisseurDao = new FournisseurDaoJdbc("jdbc:mariadb://localhost:8889/compta2", "admin",
-				"aaaa");
+		FournisseurDao fournisseurDao = new FournisseurDaoJdbc("jdbc:mariadb://localhost:8889/compta2", "admin","aaaa");
 		Fournisseur nouveauFournisseur = new Fournisseur();
 
 		nouveauFournisseur.setNom("France de matériaux");
